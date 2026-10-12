@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<ruleset name="LFW Change Notifications">
+	<description>WordPress coding standards for LFW Change Notifications.</description>
+	<file>.</file>
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<arg name="extensions" value="php"/>
+	<arg value="sp"/>
+	<config name="testVersion" value="7.4-"/>
+	<config name="minimum_wp_version" value="6.4"/>
+	<rule ref="WordPress"/>
+	<rule ref="PHPCompatibilityWP"/>
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="lfw-change-notifications"/>
+			</property>
+		</properties>
+	</rule>
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="lfwcn"/>
+				<element value="LFWCN"/>
+			</property>
+		</properties>
+	</rule>
+</ruleset>
