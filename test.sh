@@ -59,7 +59,8 @@ check "publishing sends one email" "$(mails)" "1"
 check "the subject names the event and the title" "$(subject)" "[Park QA] Published: Spring program guide"
 check "it goes to the site admin email" "$(to)" "webmaster@example.test"
 B=$(body)
-has "the body says who" "$B" "By: admin (admin)"
+has "the body says who, by display name" "$B" "By: admin"
+hasnt "the body never includes a login username" "$B" "(admin)"
 has "the body says what type" "$B" "Type: Page"
 has "the body says when, in the site time zone" "$B" "(America/New_York)"
 has "the body links to the page" "$B" "View: $BASE/?page_id=$P1"
@@ -187,6 +188,13 @@ CID=$($WP post list --post_type=post --post_status=publish --posts_per_page=1 --
 curl -s -o /dev/null -d "comment=Nice+post&author=Stranger&email=stranger%40example.test&comment_post_ID=$CID" "$BASE/wp-comments-post.php"
 check "neither sends anything" "$(mails)" "0"
 check "nor queues anything" "$(waiting)" "0"
+
+echo "==> Several recipients"
+fresh
+settings "array( 'recipients' => \"one@example.test\ntwo@example.test\", 'post_types' => array( 'post' ), 'events' => array( 'published' ), 'delivery' => 'immediate' )"
+$WP post create --post_type=post --post_status=publish --post_title="Two recipients" --user=admin >/dev/null
+check "each recipient gets a separate email" "$(mails)" "2"
+check "the last one is addressed to one person only" "$(to)" "two@example.test"
 
 echo "==> Event and content type choices"
 fresh

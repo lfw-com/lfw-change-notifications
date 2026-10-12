@@ -236,7 +236,9 @@ class LFWCN_Mailer {
 				? __( 'a user who has since been deleted', 'lfw-change-notifications' )
 				: __( 'no signed-in user (WP-CLI or a scheduled publish)', 'lfw-change-notifications' );
 		}
-		return self::plain( $user->display_name ) . ' (' . self::plain( $user->user_login ) . ')';
+		// Display name only. A login username is half of a login, so it never goes
+		// into an email that may be forwarded or stored outside the site.
+		return self::plain( $user->display_name );
 	}
 
 	/**
@@ -279,7 +281,12 @@ class LFWCN_Mailer {
 		if ( empty( $email['to'] ) ) {
 			return false;
 		}
-		return (bool) wp_mail( $email['to'], $email['subject'], $email['message'], $email['headers'] );
+		// One message per recipient, so no recipient sees the others' addresses.
+		$sent = false;
+		foreach ( array_slice( array_values( (array) $email['to'] ), 0, LFWCN_Settings::MAX_RECIPIENTS ) as $address ) {
+			$sent = (bool) wp_mail( $address, $email['subject'], $email['message'], $email['headers'] ) || $sent;
+		}
+		return $sent;
 	}
 
 	/**
